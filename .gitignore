@@ -1,0 +1,12 @@
+# Keep credentials, local complaint data, and rollback snapshots out of Git.
+.env
+.env.*
+!.env.example
+data/
+backups/
+node_modules/
+*.log
+*.mp4
+*.wav
+*.srt
+video_work/

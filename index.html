@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RAIVI | Report a civic issue by voice</title>
+<style>
+:root {
+  --navy: #0b1f3a;
+  --navy-2: #13294b;
+  --teal: #0f766e;
+  --teal-2: #14b8a6;
+  --teal-soft: #e6f4f1;
+  --ink: #1b2430;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --bg: #f4f6fa;
+  --card: #ffffff;
+  --danger: #b42318;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 6px 18px rgba(16, 24, 40, 0.06);
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.5;
+}
+
+/* ---------- App shell ---------- */
+.app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+
+.sidebar {
+  background: var(--navy);
+  color: #fff;
+  padding: 22px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.brand { display: flex; align-items: center; gap: 12px; padding: 0 6px; }
+.logo {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--teal-2), var(--teal));
+  display: grid; place-items: center; font-weight: 800; font-size: 20px;
+}
+.brand-name { font-weight: 800; letter-spacing: 0.08em; font-size: 18px; }
+.brand-sub { font-size: 11.5px; opacity: 0.7; line-height: 1.3; }
+
+.nav { display: flex; flex-direction: column; gap: 4px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; text-align: left;
+  padding: 10px 12px; border-radius: 10px;
+  background: transparent; color: #cbd5e1;
+  border: none; font: inherit; font-size: 0.95rem; cursor: pointer;
+}
+.nav-item:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
+.nav-item.active { background: rgba(255, 255, 255, 0.12); color: #fff; font-weight: 600; }
+.nav-icon { width: 22px; text-align: center; opacity: 0.85; }
+
+.sidebar-foot { margin-top: auto; font-size: 0.82rem; color: #94a3b8; padding: 0 6px; }
+.sidebar-foot a { color: #5eead4; text-decoration: none; }
+.sidebar-foot a:hover { text-decoration: underline; }
+.pill {
+  display: inline-block; font-size: 12px; padding: 4px 10px; border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12); color: #fff;
+}
+
+.main { padding: 24px 28px 32px; min-width: 0; }
+
+.topbar {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  gap: 16px; flex-wrap: wrap; margin-bottom: 20px;
+}
+.topbar h1 { font-size: 1.6rem; margin: 0 0 2px; }
+.topbar p { margin: 0; }
+
+.view { animation: fade 0.25s ease; }
+@keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+.site-footer { color: var(--muted); font-size: 0.8rem; text-align: center; margin-top: 28px; }
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+.card h2 { margin: 0 0 6px; font-size: 1.2rem; }
+.card h3 { margin: 0 0 12px; font-size: 1rem; }
+.card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.card-head h3 { margin: 0; }
+.wide { max-width: 760px; }
+.narrow { max-width: 420px; }
+
+/* ---------- Dashboard ---------- */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 16px; }
+.stat-card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 16px; display: flex; gap: 14px; align-items: center;
+}
+.stat-icon {
+  width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center;
+  font-size: 18px; font-weight: 700; flex-shrink: 0;
+}
+.t-teal { background: #ccfbf1; color: #0f766e; }
+.t-blue { background: #dbeafe; color: #1d4ed8; }
+.t-green { background: #dcfae6; color: #067647; }
+.t-violet { background: #ede9fe; color: #6d28d9; }
+.stat-value { font-size: 1.5rem; font-weight: 700; color: var(--navy); line-height: 1.1; }
+.stat-label { font-size: 0.8rem; color: var(--muted); }
+
+.tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.tile {
+  text-align: left; cursor: pointer; font: inherit; color: var(--ink);
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 16px; transition: transform 0.15s, border-color 0.15s;
+}
+.tile:hover { transform: translateY(-2px); border-color: var(--teal-2); }
+.tile-icon {
+  width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center;
+  background: var(--teal-soft); color: var(--teal); font-size: 16px; margin-bottom: 10px;
+}
+.tile-title { font-weight: 700; margin-bottom: 4px; }
+.tile-text { font-size: 0.85rem; color: var(--muted); }
+
+.dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+.bar-row { display: grid; grid-template-columns: 96px 1fr 28px; gap: 10px; align-items: center; margin-bottom: 10px; font-size: 0.9rem; }
+.bar-track { height: 10px; background: #eef2f7; border-radius: 999px; overflow: hidden; }
+.bar-fill { height: 100%; background: linear-gradient(90deg, var(--teal-2), var(--teal)); border-radius: 999px; }
+.bar-count { text-align: right; color: var(--muted); font-weight: 600; }
+
+.recent-row {
+  width: 100%; display: grid; grid-template-columns: 1fr 110px auto; gap: 12px; align-items: center;
+  padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff;
+  cursor: pointer; font: inherit; text-align: left; margin-bottom: 8px;
+}
+.recent-row:hover { border-color: var(--teal-2); background: #f8fffd; }
+.recent-cat { color: var(--muted); font-size: 0.88rem; }
+.mono, .report-id-small { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight: 700; font-size: 0.9rem; }
+
+/* ---------- Buttons and inputs ---------- */
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.actions { margin-top: 18px; justify-content: flex-end; }
+.btn-primary, .btn-secondary {
+  font: inherit; font-weight: 600; border-radius: 10px; padding: 10px 18px;
+  cursor: pointer; border: 1px solid transparent; display: inline-block; text-align: center;
+}
+.btn-primary { background: var(--teal); color: #fff; }
+.btn-primary:hover { background: #0d645e; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-secondary { background: #fff; color: var(--ink); border-color: #cbd5e1; }
+.btn-secondary:hover { background: #f1f5f9; }
+
+.select, .input {
+  width: 100%; font: inherit; padding: 10px 12px; border-radius: 10px;
+  border: 1px solid #cbd5e1; background: #fff; color: var(--ink);
+}
+.input:focus, .select:focus { outline: 2px solid var(--teal-2); outline-offset: 1px; }
+.row .input { flex: 1; min-width: 220px; }
+
+/* ---------- Report flow ---------- */
+.steps { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+.step { font-size: 0.85rem; padding: 6px 12px; border-radius: 999px; background: #eef2f7; color: var(--muted); }
+.step.active { background: var(--teal); color: #fff; }
+.step.complete { background: var(--teal-soft); color: var(--teal); }
+
+.mic-wrap { text-align: center; padding: 14px 0 6px; }
+.mic {
+  width: 128px; height: 128px; border-radius: 50%; border: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--teal-2), var(--teal)); color: #fff;
+  box-shadow: 0 10px 30px rgba(15, 118, 110, 0.35); transition: transform 0.15s;
+}
+.mic:hover { transform: scale(1.03); }
+.mic:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.mic.recording { background: var(--danger); animation: pulse 1.2s infinite; }
+.mic-icon { font-size: 34px; line-height: 1; }
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(180, 35, 24, 0.45); }
+  70% { box-shadow: 0 0 0 18px rgba(180, 35, 24, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(180, 35, 24, 0); }
+}
+.mic-label { margin-top: 14px; font-weight: 600; font-size: 1.05rem; }
+.muted { color: var(--muted); }
+.small { font-size: 0.85rem; }
+
+.optional { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 16px; }
+.optional-title { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
+.preview { display: block; max-width: 100%; max-height: 220px; border-radius: 10px; margin-top: 12px; border: 1px solid var(--line); }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+.field-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin: 14px 0 6px; }
+.transcript-box {
+  background: #f8fafc; border: 1px solid var(--line); border-radius: 10px;
+  padding: 14px; font-size: 1.05rem; line-height: 1.6; white-space: pre-wrap; min-height: 56px;
+}
+.dept-box {
+  background: var(--teal-soft); border-radius: 10px; padding: 10px 12px;
+  font-size: 0.92rem; color: #134e4a; min-height: 42px;
+}
+.error { color: var(--danger); font-size: 0.92rem; margin-top: 12px; }
+
+.success-badge {
+  display: inline-block; background: #dcfae6; color: #067647;
+  font-weight: 600; font-size: 0.85rem; padding: 4px 12px; border-radius: 999px;
+}
+.report-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 1.5rem; font-weight: 700; letter-spacing: 0.04em; margin: 8px 0 14px; color: var(--navy);
+}
+.disclaimer { font-size: 0.82rem; color: var(--muted); margin-top: 18px; border-top: 1px solid var(--line); padding-top: 12px; }
+
+/* ---------- Tracking ---------- */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.chip {
+  font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.8rem;
+  padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer;
+}
+.recent { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 4px; }
+
+.report { margin-top: 16px; }
+.report-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.progress { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 14px 0 6px; }
+.progress-step { text-align: center; color: var(--muted); font-size: 0.78rem; }
+.progress-step .dot { width: 12px; height: 12px; border-radius: 50%; background: #cbd5e1; margin: 0 auto 4px; }
+.progress-step.done { color: var(--teal); font-weight: 600; }
+.progress-step.done .dot { background: var(--teal); }
+.meta { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 14px 0; font-size: 0.92rem; }
+.meta dt { color: var(--muted); }
+.meta dd { margin: 0; }
+.history { padding-left: 18px; margin: 6px 0 0; }
+.history li { margin-bottom: 8px; }
+
+.badge {
+  padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600;
+  background: #eef2f7; color: var(--muted); white-space: nowrap; justify-self: start;
+}
+.badge-received { background: #dbeafe; color: #1d4ed8; }
+.badge-routed { background: #fef3c7; color: #b45309; }
+.badge-in-progress { background: #ede9fe; color: #6d28d9; }
+.badge-resolved { background: #dcfae6; color: #067647; }
+.badge-sample { background: #fef3c7; color: #b45309; }
+
+/* ---------- Help and departments ---------- */
+.how-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.how-step { display: flex; gap: 14px; align-items: flex-start; }
+.how-num {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--teal); color: #fff;
+  display: grid; place-items: center; font-weight: 700; flex-shrink: 0;
+}
+.how-step h3 { margin: 0 0 4px; }
+.how-step p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* ---------- Staff console ---------- */
+.header-actions { display: flex; gap: 8px; align-items: center; }
+.dash-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.dash-head h1 { margin: 0 0 4px; font-size: 1.5rem; }
+.report-list { display: grid; gap: 14px; }
+.report-card { margin: 0; }
+.controls { display: grid; grid-template-columns: 180px 1fr auto; gap: 10px; margin-top: 14px; }
+.stat { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px; box-shadow: var(--shadow); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 980px) {
+  .stats, .tiles { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; }
+  .nav { flex-direction: row; flex-wrap: wrap; }
+  .nav-item { width: auto; }
+  .dash-grid, .how-grid, .grid2 { grid-template-columns: 1fr; }
+  .controls { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .stats, .tiles { grid-template-columns: 1fr; }
+  .main { padding: 18px 14px 28px; }
+  .progress { grid-template-columns: repeat(2, 1fr); row-gap: 10px; }
+  .recent-row { grid-template-columns: 1fr; }
+}
+
+/* Refined civic service interface */
+:root {
+  --navy: #102a43;
+  --navy-2: #173f5f;
+  --teal: #087f75;
+  --teal-2: #36c7b5;
+  --bg: #f2f7fb;
+  --line: #dce7ef;
+  --shadow: 0 12px 32px rgba(16, 42, 67, .075);
+  --radius: 18px;
+}
+body { background: radial-gradient(ellipse at 88% -12%, #dff5f1 0, transparent 32%), var(--bg); }
+.sidebar { background: linear-gradient(165deg, #102a43 0%, #123b53 58%, #0e5a5d 125%); box-shadow: 8px 0 28px rgba(16,42,67,.08); }
+.logo { box-shadow: 0 8px 18px rgba(45,212,191,.22); }
+.nav { gap: 7px; }
+.nav-item { min-height: 46px; transition: background .18s ease, color .18s ease, transform .18s ease; }
+.nav-item:hover { transform: translateX(2px); }
+.nav-item.active { background: linear-gradient(90deg, rgba(45,212,191,.2), rgba(255,255,255,.08)); box-shadow: inset 3px 0 #5eead4; }
+.main { max-width: 1660px; width: 100%; margin-inline: auto; padding: 30px clamp(20px, 3vw, 48px) 42px; }
+.topbar { padding: 4px 2px 20px; border-bottom: 1px solid rgba(190,205,217,.65); margin-bottom: 24px; }
+.topbar h1 { color: var(--navy); font-size: clamp(1.65rem, 2.4vw, 2.2rem); letter-spacing: -.035em; }
+.card, .stat-card, .tile { border-color: #e1eaf1; box-shadow: var(--shadow); }
+.card { padding: clamp(20px, 2.4vw, 30px); }
+.stat-card { min-height: 104px; padding: 19px; }
+.stat-icon { border-radius: 14px; }
+.tile { min-height: 154px; padding: 19px; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+.tile:hover { transform: translateY(-3px); box-shadow: 0 16px 32px rgba(16,42,67,.11); }
+.btn-primary, .btn-secondary { min-height: 46px; transition: transform .16s ease, box-shadow .16s ease, background .16s ease; }
+.btn-primary { box-shadow: 0 7px 18px rgba(8,127,117,.18); }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 22px rgba(8,127,117,.22); }
+.input, .select { min-height: 46px; border-color: #cbd9e4; }
+.input:focus, .select:focus { outline: 3px solid rgba(45,212,191,.24); border-color: var(--teal); }
+.mic { box-shadow: 0 14px 34px rgba(8,127,117,.3); }
+.reporter-field { max-width: 560px; margin: 18px auto 24px; text-align: left; }
+.reporter-field .field-label { display: block; margin: 0 0 6px; }
+.reporter-field .muted { margin-top: 6px; }
+.optional-label { color: var(--muted); font-size: .82em; font-weight: 500; text-transform: none; letter-spacing: 0; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #2dd4bf; outline-offset: 3px; }
+@media (max-width: 860px) {
+  .sidebar { box-shadow: 0 8px 24px rgba(16,42,67,.09); }
+  .main { padding: 22px 18px 32px; }
+  .topbar { align-items: center; }
+}
+@media (max-width: 560px) {
+  .main { padding: 18px 14px 28px; }
+  .topbar { gap: 12px; }
+  #newReportTop { min-height: 42px; padding-inline: 13px; }
+  .card { padding: 19px 16px; }
+  .tile { min-height: 130px; }
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">R</div>
+      <div>
+        <div class="brand-name">RAIVI</div>
+        <div class="brand-sub">Reporting AI with<br />Voice Integration</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-item active" data-go="dashboard"><span class="nav-icon">▦</span>Dashboard</button>
+      <button class="nav-item" data-go="report"><span class="nav-icon">●</span>Report issue</button>
+      <button class="nav-item" data-go="track"><span class="nav-icon">⌕</span>Track complaint</button>
+      <button class="nav-item" data-go="departments"><span class="nav-icon">≡</span>Departments</button>
+      <button class="nav-item" data-go="help"><span class="nav-icon">?</span>How it works</button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <span class="pill">Nagpur · Demo</span>
+      <div style="margin-top:10px"><a href="/staff">Staff console →</a></div>
+    </div>
+  </aside>
+
+  <!-- Main area -->
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <h1 id="pageTitle">Dashboard</h1>
+        <p id="pageSub" class="muted small">Your reports and quick actions</p>
+      </div>
+      <button id="newReportTop" class="btn-primary" type="button">+ New report</button>
+    </header>
+
+    <!-- Dashboard -->
+    <section class="view" id="view-dashboard">
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-icon t-teal">#</div>
+          <div><div class="stat-value" id="statTotal">0</div><div class="stat-label">Reports on this device</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon t-blue">◷</div>
+          <div><div class="stat-value" id="statActive">0</div><div class="stat-label">Open complaints</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon t-green">✓</div>
+          <div><div class="stat-value" id="statResolved">0</div><div class="stat-label">Resolved</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon t-violet">≡</div>
+          <div><div class="stat-value" id="statDepts">0</div><div class="stat-label">Routing options in directory</div></div>
+        </div>
+      </div>
+
+      <div class="tiles">
+        <button class="tile" data-go="report" type="button">
+          <div class="tile-icon">●</div>
+          <div class="tile-title">Report by voice</div>
+          <div class="tile-text">Speak a complaint, confirm it, and submit in under a minute.</div>
+        </button>
+        <button class="tile" data-go="track" type="button">
+          <div class="tile-icon">⌕</div>
+          <div class="tile-title">Track a complaint</div>
+          <div class="tile-text">See the status and history of any complaint by its ID.</div>
+        </button>
+        <button class="tile" data-go="departments" type="button">
+          <div class="tile-icon">≡</div>
+          <div class="tile-title">Departments</div>
+          <div class="tile-text">See which department handles each type of issue.</div>
+        </button>
+        <button class="tile" data-go="help" type="button">
+          <div class="tile-icon">?</div>
+          <div class="tile-title">How it works</div>
+          <div class="tile-text">Understand the steps from voice report to resolution.</div>
+        </button>
+      </div>
+
+      <div class="dash-grid">
+        <div class="card">
+          <div class="card-head"><h3>Complaints by category</h3></div>
+          <div id="catBars"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Recent reports</h3></div>
+          <div id="recentRows"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Report flow -->
+    <section class="view" id="view-report" hidden>
+      <div class="card wide">
+        <div class="steps">
+          <div class="step" id="stepIndicator1">1 · Speak</div>
+          <div class="step" id="stepIndicator2">2 · Confirm</div>
+          <div class="step" id="stepIndicator3">3 · Submitted</div>
+        </div>
+
+        <!-- Step 1: record -->
+        <div id="stepRecord">
+          <div class="mic-wrap">
+            <button id="micBtn" class="mic" type="button" aria-label="Start recording">
+              <span class="mic-icon">●</span>
+            </button>
+            <div id="micLabel" class="mic-label">Tap to speak</div>
+            <div id="micStatus" class="muted small">Speak for up to 25 seconds. Say what happened and where.</div>
+          </div>
+
+          <div class="reporter-field">
+            <label class="field-label" for="complainantName">Full name <span class="optional-label">(optional)</span></label>
+            <input id="complainantName" class="input" type="text" maxlength="120" autocomplete="name" placeholder="Enter your full name if you’d like staff to know who reported" />
+            <div class="muted small">This is shown to signed-in staff. You can leave it blank.</div>
+          </div>
+
+          <div class="optional">
+            <div class="optional-title">Optional evidence</div>
+            <div class="row">
+              <label class="btn-secondary" for="photoInput">Add a photo</label>
+              <input id="photoInput" type="file" accept="image/jpeg,image/png" hidden />
+              <button id="locBtn" class="btn-secondary" type="button">Use GPS location</button>
+            </div>
+            <img id="photoPreview" class="preview" alt="Photo preview" hidden />
+            <div id="photoStatus" class="muted small"></div>
+            <div id="locStatus" class="muted small"></div>
+            <label class="field-label" for="locationText">Or enter a place, address, or landmark</label>
+            <input id="locationText" class="input" type="text" maxlength="300" placeholder="For example: near Sitabuldi bus stop, Nagpur" autocomplete="street-address" />
+            <div class="muted small">Add GPS, a written location, or both. Staff will see the location with your complaint.</div>
+          </div>
+          <div id="recordError" class="error" hidden></div>
+        </div>
+
+        <!-- Step 2: confirm -->
+        <div id="stepConfirm" hidden>
+          <h2>Confirm your report</h2>
+          <p class="muted small">Check what RAIVI heard. If it is wrong, record again.</p>
+
+          <div class="field-label">What you said</div>
+          <div id="transcriptText" class="transcript-box"></div>
+
+          <div class="grid2">
+            <div>
+              <div class="field-label">Category</div>
+              <select id="categorySelect" class="select"></select>
+            </div>
+            <div>
+              <div class="field-label">Routed to</div>
+              <div id="deptText" class="dept-box"></div>
+            </div>
+          </div>
+
+          <div class="row actions">
+            <button id="againBtn" class="btn-secondary" type="button">Record again</button>
+            <button id="submitBtn" class="btn-primary" type="button">Submit report</button>
+          </div>
+          <div id="confirmError" class="error" hidden></div>
+        </div>
+
+        <!-- Step 3: done -->
+        <div id="stepDone" hidden>
+          <div class="success-badge">Report saved</div>
+          <h2>Your complaint ID</h2>
+          <div class="report-id" id="doneId"></div>
+          <div class="row actions">
+            <button id="copyIdBtn" class="btn-secondary" type="button">Copy ID</button>
+            <button id="newBtn" class="btn-primary" type="button">Report another issue</button>
+          </div>
+          <div id="doneTimeline"></div>
+          <p class="disclaimer">RAIVI has recorded and routed your report inside this system. Automatic filing with the department is not part of this demo. Use the ID above to track progress here.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Track -->
+    <section class="view" id="view-track" hidden>
+      <div class="card wide">
+        <h2>Track a complaint</h2>
+        <p class="muted small">Enter the complaint ID you received.</p>
+        <div class="row">
+          <input id="trackInput" class="input" placeholder="RV-20261109-0123456789ABCDEF01234567" autocomplete="off" />
+          <button id="trackBtn" class="btn-primary" type="button">Check status</button>
+        </div>
+        <div id="trackError" class="error" hidden></div>
+        <div id="trackResult"></div>
+        <div class="recent">
+          <div class="field-label">Recent reports on this device</div>
+          <div id="recentList" class="chips"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Departments -->
+    <section class="view" id="view-departments" hidden>
+      <div class="card">
+        <h3>Routing directory (Nagpur, sample)</h3>
+        <p class="muted small">Each routing must be checked against the official source before real use. Road ownership is confirmed case by case.</p>
+        <table>
+          <thead><tr><th>Category</th><th>Department</th><th>Status</th></tr></thead>
+          <tbody id="deptTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Help -->
+    <section class="view" id="view-help" hidden>
+      <div class="card">
+        <div class="how-grid">
+          <div class="how-step">
+            <div class="how-num">1</div>
+            <div><h3>Speak</h3><p>Describe the problem in Hindi, English or Hinglish. You can add a photo and your location.</p></div>
+          </div>
+          <div class="how-step">
+            <div class="how-num">2</div>
+            <div><h3>Confirm</h3><p>Check the transcript and category. Record again if RAIVI misheard you.</p></div>
+          </div>
+          <div class="how-step">
+            <div class="how-num">3</div>
+            <div><h3>Route</h3><p>The complaint is saved and routed to the department in the directory.</p></div>
+          </div>
+          <div class="how-step">
+            <div class="how-num">4</div>
+            <div><h3>Track</h3><p>Use your complaint ID to see each status change until it is resolved.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      RAIVI is a demonstration civic-reporting system. It does not submit complaints to government systems and does not guarantee resolution.
+    </footer>
+  </div>
+</div>
+
+<script>
+// Shared helpers for RAIVI pages.
+const STATUSES = ["Received", "Routed", "In Progress", "Resolved"];
+
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined && text !== null) node.textContent = text;
+  return node;
+}
+
+function formatTime(iso) {
+  return new Date(iso).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
+}
+
+function statusBadge(status) {
+  return el("span", "badge badge-" + status.toLowerCase().replace(/\s+/g, "-"), status);
+}
+
+function renderProgress(status) {
+  const idx = STATUSES.indexOf(status);
+  const wrap = el("div", "progress");
+  STATUSES.forEach((s, i) => {
+    const step = el("div", "progress-step" + (i <= idx ? " done" : ""));
+    step.append(el("div", "dot"), el("div", "progress-label", s));
+    wrap.append(step);
+  });
+  return wrap;
+}
+
+function addMeta(dl, label, value) {
+  dl.append(el("dt", "", label), el("dd", "", value));
+}
+
+// Full view of one complaint: ID, status, progress, details, photo and history.
+function renderReport(report) {
+  const wrap = el("div", "report");
+
+  const head = el("div", "report-head");
+  head.append(el("div", "report-id-small", report.id), statusBadge(report.status));
+  wrap.append(head, renderProgress(report.status));
+
+  const meta = el("dl", "meta");
+  addMeta(meta, "Category", report.category);
+  addMeta(meta, "Department", report.department);
+  addMeta(meta, "Submitted", formatTime(report.created_at));
+  addMeta(meta, "Last update", formatTime(report.updated_at));
+  wrap.append(meta);
+
+  wrap.append(el("div", "field-label", "Complaint (from voice)"));
+  wrap.append(el("div", "transcript-box", report.transcript));
+
+  if (report.photo_url) {
+    const img = el("img", "preview");
+    img.src = report.photo_url;
+    img.alt = "Photo attached to the complaint";
+    wrap.append(img);
+  }
+
+  if (report.history && report.history.length) {
+    wrap.append(el("div", "field-label", "History"));
+    const list = el("ul", "history");
+    report.history.forEach((h) => {
+      const li = el("li");
+      li.append(el("strong", "", h.status), el("span", "muted small", "  " + formatTime(h.at)));
+      if (h.note) li.append(el("div", "small", h.note));
+      list.append(li);
+    });
+    wrap.append(list);
+  }
+  return wrap;
+}
+
+// Decode the browser recording and convert it to 16-bit mono WAV (the format the API accepts)
+function encodeWav(audioBuffer) {
+  const sampleRate = audioBuffer.sampleRate;
+  const length = audioBuffer.length;
+  const mono = new Float32Array(length);
+  for (let c = 0; c < audioBuffer.numberOfChannels; c++) {
+    const data = audioBuffer.getChannelData(c);
+    for (let i = 0; i < length; i++) mono[i] += data[i] / audioBuffer.numberOfChannels;
+  }
+  const byteLength = 44 + length * 2;
+  const view = new DataView(new ArrayBuffer(byteLength));
+  const writeStr = (offset, s) => {
+    for (let i = 0; i < s.length; i++) view.setUint8(offset + i, s.charCodeAt(i));
+  };
+  writeStr(0, "RIFF"); view.setUint32(4, byteLength - 8, true); writeStr(8, "WAVE");
+  writeStr(12, "fmt "); view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true); view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true);
+  writeStr(36, "data"); view.setUint32(40, length * 2, true);
+  let offset = 44;
+  for (let i = 0; i < length; i++) {
+    const s = Math.max(-1, Math.min(1, mono[i]));
+    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+    offset += 2;
+  }
+  return new Blob([view], { type: "audio/wav" });
+}
+
+async function recordingToWav(blob) {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  try {
+    const audioBuffer = await ctx.decodeAudioData(await blob.arrayBuffer());
+    return encodeWav(audioBuffer);
+  } finally {
+    ctx.close();
+  }
+}
+
+// Speak a short confirmation. Failure is silent: the report is already saved.
+async function speakText(text) {
+  try {
+    const res = await fetch("/api/speak", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+    if (!res.ok) return;
+    const audio = new Audio(URL.createObjectURL(await res.blob()));
+    audio.play();
+  } catch {
+    // Optional audio
+  }
+}
+
+</script>
+<script>
+const $ = (id) => document.getElementById(id);
+const MAX_SECONDS = 25;
+const MAX_PHOTO_BYTES = 4 * 1024 * 1024;
+const RECENT_KEY = "raivi_recent_reports";
+
+const VIEWS = {
+  dashboard: { title: "Dashboard", sub: "Your reports and quick actions" },
+  report: { title: "Report an issue", sub: "Speak your complaint in Hindi, English or Hinglish" },
+  track: { title: "Track a complaint", sub: "Check the status of any complaint by its ID" },
+  departments: { title: "Departments", sub: "Where each type of complaint is routed (sample directory)" },
+  help: { title: "How it works", sub: "From your voice to a resolved complaint" },
+};
+
+const state = { transcript: "", photo: null, coords: null };
+const directoryCache = {};
+let recorder = null, chunks = [], stopTimer = null, tick = null, startedAt = 0;
+
+// ---------- Navigation ----------
+function showView(name) {
+  Object.keys(VIEWS).forEach((v) => { $("view-" + v).hidden = v !== name; });
+  document.querySelectorAll(".nav-item").forEach((b) => b.classList.toggle("active", b.dataset.go === name));
+  $("pageTitle").textContent = VIEWS[name].title;
+  $("pageSub").textContent = VIEWS[name].sub;
+  if (name === "dashboard") loadDashboard();
+  if (name === "track") renderRecent();
+  if (name === "departments") loadDepartments();
+}
+
+document.querySelectorAll("[data-go]").forEach((b) => {
+  b.addEventListener("click", () => showView(b.dataset.go));
+});
+
+$("newReportTop").addEventListener("click", () => {
+  resetReport();
+  showView("report");
+});
+
+function showStep(n) {
+  $("stepRecord").hidden = n !== 1;
+  $("stepConfirm").hidden = n !== 2;
+  $("stepDone").hidden = n !== 3;
+  [1, 2, 3].forEach((i) => {
+    $("stepIndicator" + i).classList.toggle("active", i === n);
+    $("stepIndicator" + i).classList.toggle("complete", i < n);
+  });
+}
+
+function setError(id, msg) {
+  $(id).textContent = msg || "";
+  $(id).hidden = !msg;
+}
+
+function resetReport() {
+  state.transcript = "";
+  state.photo = null;
+  state.coords = null;
+  $("photoPreview").hidden = true;
+  $("photoInput").value = "";
+  $("photoStatus").textContent = "";
+  $("locStatus").textContent = "";
+  $("locationText").value = "";
+  $("complainantName").value = "";
+  setError("confirmError", "");
+  setError("recordError", "");
+  showStep(1);
+}
+
+// ---------- Recording ----------
+async function startRecording() {
+  setError("recordError", "");
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch {
+    setError("recordError", "Microphone access was blocked. Allow it in your browser settings and try again.");
+    return;
+  }
+
+  chunks = [];
+  recorder = new MediaRecorder(stream);
+  recorder.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+  recorder.onstop = () => finishRecording(stream);
+  recorder.start();
+
+  startedAt = Date.now();
+  $("micBtn").classList.add("recording");
+  $("micLabel").textContent = "Recording... tap to stop";
+  tick = setInterval(() => {
+    const s = Math.floor((Date.now() - startedAt) / 1000);
+    $("micStatus").textContent = `${s}s of ${MAX_SECONDS}s`;
+  }, 250);
+  stopTimer = setTimeout(stopRecording, MAX_SECONDS * 1000);
+}
+
+function stopRecording() {
+  if (recorder && recorder.state === "recording") recorder.stop();
+}
+
+async function finishRecording(stream) {
+  stream.getTracks().forEach((t) => t.stop());
+  clearInterval(tick);
+  clearTimeout(stopTimer);
+  $("micBtn").classList.remove("recording");
+  $("micBtn").disabled = true;
+  $("micLabel").textContent = "Processing...";
+  $("micStatus").textContent = "Transcribing your report";
+
+  try {
+    const wav = await recordingToWav(new Blob(chunks, { type: recorder.mimeType || "audio/webm" }));
+    const res = await fetch("/api/transcribe", {
+      method: "POST",
+      headers: { "Content-Type": "audio/wav" },
+      body: wav,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) throw new Error("Transcription failed. Please try again.");
+    const text = (data.transcript || "").trim();
+    if (!text) throw new Error("No speech was detected. Please try again, closer to the microphone.");
+
+    state.transcript = text;
+    await showConfirm();
+  } catch (err) {
+    setError("recordError", err.message || "Something went wrong. Please try again.");
+  } finally {
+    $("micBtn").disabled = false;
+    $("micLabel").textContent = "Tap to speak";
+    $("micStatus").textContent = "Speak for up to 25 seconds. Say what happened and where.";
+  }
+}
+
+$("micBtn").addEventListener("click", () => {
+  if (recorder && recorder.state === "recording") stopRecording();
+  else startRecording();
+});
+
+// ---------- Confirm ----------
+async function showConfirm() {
+  $("transcriptText").textContent = state.transcript;
+  const res = await fetch("/api/classify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ transcript: state.transcript }),
+  });
+  const data = await res.json();
+  Object.assign(directoryCache, data.directory);
+
+  const select = $("categorySelect");
+  select.innerHTML = "";
+  Object.keys(data.directory).forEach((name) => {
+    const option = document.createElement("option");
+    option.value = name;
+    option.textContent = name;
+    select.append(option);
+  });
+  select.value = data.category;
+  updateDept();
+  showStep(2);
+}
+
+function updateDept() {
+  $("deptText").textContent = directoryCache[$("categorySelect").value] || "";
+}
+$("categorySelect").addEventListener("change", updateDept);
+
+$("againBtn").addEventListener("click", () => {
+  state.transcript = "";
+  setError("confirmError", "");
+  showStep(1);
+});
+
+// ---------- Optional evidence ----------
+$("photoInput").addEventListener("change", () => {
+  const file = $("photoInput").files[0];
+  if (!file) return;
+  if (!["image/jpeg", "image/png"].includes(file.type)) {
+    $("photoStatus").textContent = "Please choose a JPG or PNG photo.";
+    return;
+  }
+  if (file.size > MAX_PHOTO_BYTES) {
+    $("photoStatus").textContent = "The photo must be under 4 MB.";
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    state.photo = reader.result;
+    $("photoPreview").src = reader.result;
+    $("photoPreview").hidden = false;
+    $("photoStatus").textContent = "Photo attached: " + file.name;
+  };
+  reader.readAsDataURL(file);
+});
+
+$("locBtn").addEventListener("click", () => {
+  if (!navigator.geolocation) {
+    $("locStatus").textContent = "Location is not available in this browser.";
+    return;
+  }
+  $("locStatus").textContent = "Getting your location...";
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      state.coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      $("locStatus").textContent = `Location added (${state.coords.lat.toFixed(5)}, ${state.coords.lng.toFixed(5)})`;
+    },
+    () => {
+      $("locStatus").textContent = "Location permission was denied. You can still submit without it.";
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
+});
+
+// ---------- Submit ----------
+$("submitBtn").addEventListener("click", async () => {
+  const btn = $("submitBtn");
+  btn.disabled = true;
+  setError("confirmError", "");
+  try {
+    const res = await fetch("/api/reports", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        transcript: state.transcript,
+        complainant_name: $("complainantName").value.trim(),
+        category: $("categorySelect").value,
+        photo: state.photo,
+        lat: state.coords ? state.coords.lat : null,
+        lng: state.coords ? state.coords.lng : null,
+        location_text: $("locationText").value.trim(),
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Could not save the report.");
+
+    rememberReport(data.id);
+    $("doneId").textContent = data.id;
+    const timeline = $("doneTimeline");
+    timeline.innerHTML = "";
+    timeline.append(renderReport(data));
+    showStep(3);
+    renderRecent();
+    speakText(`Aapki shikayat darj ho gayi hai. Category: ${data.category}.`);
+  } catch (err) {
+    setError("confirmError", err.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+$("copyIdBtn").addEventListener("click", () => {
+  navigator.clipboard.writeText($("doneId").textContent).then(() => {
+    $("copyIdBtn").textContent = "Copied";
+    setTimeout(() => { $("copyIdBtn").textContent = "Copy ID"; }, 1500);
+  });
+});
+
+$("newBtn").addEventListener("click", resetReport);
+
+// ---------- Tracking ----------
+async function trackReport(rawId) {
+  setError("trackError", "");
+  $("trackResult").innerHTML = "";
+  const id = rawId.trim();
+  if (!id) {
+    setError("trackError", "Enter a complaint ID.");
+    return;
+  }
+  try {
+    const res = await fetch("/api/reports/" + encodeURIComponent(id));
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Complaint not found.");
+    $("trackResult").append(renderReport(data));
+  } catch (err) {
+    setError("trackError", err.message);
+  }
+}
+
+$("trackBtn").addEventListener("click", () => trackReport($("trackInput").value));
+$("trackInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") trackReport($("trackInput").value);
+});
+
+// ---------- Recent reports (this device) ----------
+function getRecent() {
+  try { return JSON.parse(localStorage.getItem(RECENT_KEY)) || []; } catch { return []; }
+}
+
+function rememberReport(id) {
+  const list = [id, ...getRecent().filter((x) => x !== id)].slice(0, 20);
+  localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+}
+
+function renderRecent() {
+  const box = $("recentList");
+  box.innerHTML = "";
+  const ids = getRecent().slice(0, 5);
+  if (!ids.length) {
+    box.append(el("span", "muted small", "No reports yet on this device."));
+    return;
+  }
+  ids.forEach((id) => {
+    const chip = el("button", "chip", id);
+    chip.type = "button";
+    chip.addEventListener("click", () => {
+      $("trackInput").value = id;
+      trackReport(id);
+    });
+    box.append(chip);
+  });
+}
+
+// ---------- Dashboard ----------
+async function loadDashboard() {
+  const ids = getRecent();
+  const reports = (await Promise.all(ids.map(async (id) => {
+    try {
+      const res = await fetch("/api/reports/" + encodeURIComponent(id));
+      return res.ok ? await res.json() : null;
+    } catch {
+      return null;
+    }
+  }))).filter(Boolean);
+
+  const resolved = reports.filter((r) => r.status === "Resolved").length;
+  $("statTotal").textContent = reports.length;
+  $("statActive").textContent = reports.length - resolved;
+  $("statResolved").textContent = resolved;
+
+  if (!Object.keys(directoryCache).length) await loadDirectory();
+  $("statDepts").textContent = Object.keys(directoryCache).length;
+
+  const counts = {};
+  reports.forEach((r) => { counts[r.category] = (counts[r.category] || 0) + 1; });
+  const max = Math.max(1, ...Object.values(counts));
+  const bars = $("catBars");
+  bars.innerHTML = "";
+  if (!reports.length) bars.append(el("div", "muted small", "Submit a report to see the breakdown by category."));
+  Object.entries(counts).sort((a, b) => b[1] - a[1]).forEach(([name, count]) => {
+    const row = el("div", "bar-row");
+    const track = el("div", "bar-track");
+    const fill = el("div", "bar-fill");
+    fill.style.width = (count / max * 100) + "%";
+    track.append(fill);
+    row.append(el("span", "", name), track, el("span", "bar-count", String(count)));
+    bars.append(row);
+  });
+
+  const rows = $("recentRows");
+  rows.innerHTML = "";
+  if (!reports.length) rows.append(el("div", "muted small", "No reports yet. Use Report by voice to create your first one."));
+  reports.slice(0, 6).forEach((r) => {
+    const item = el("button", "recent-row");
+    item.type = "button";
+    item.append(el("span", "mono", r.id), el("span", "recent-cat", r.category), statusBadge(r.status));
+    item.addEventListener("click", () => {
+      $("trackInput").value = r.id;
+      showView("track");
+      trackReport(r.id);
+    });
+    rows.append(item);
+  });
+}
+
+// ---------- Departments ----------
+async function loadDirectory() {
+  const res = await fetch("/api/directory");
+  const data = await res.json();
+  Object.assign(directoryCache, data.directory);
+  return directoryCache;
+}
+
+async function loadDepartments() {
+  await loadDirectory();
+  const body = $("deptTable");
+  body.innerHTML = "";
+  Object.entries(directoryCache).forEach(([category, department]) => {
+    const tr = document.createElement("tr");
+    const statusCell = document.createElement("td");
+    statusCell.append(el("span", "badge badge-sample", "Sample: verify before use"));
+    tr.append(el("td", "", category), el("td", "", department), statusCell);
+    body.append(tr);
+  });
+}
+
+// ---------- Start ----------
+renderRecent();
+showStep(1);
+showView("dashboard");
+</script>
+</body>
+</html>

@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RAIVI | Staff console</title>
+<style>
+:root {
+  --navy: #0b1f3a;
+  --navy-2: #13294b;
+  --teal: #0f766e;
+  --teal-2: #14b8a6;
+  --teal-soft: #e6f4f1;
+  --ink: #1b2430;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --bg: #f4f6fa;
+  --card: #ffffff;
+  --danger: #b42318;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 6px 18px rgba(16, 24, 40, 0.06);
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.5;
+}
+
+/* ---------- App shell ---------- */
+.app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+
+.sidebar {
+  background: var(--navy);
+  color: #fff;
+  padding: 22px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.brand { display: flex; align-items: center; gap: 12px; padding: 0 6px; }
+.logo {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--teal-2), var(--teal));
+  display: grid; place-items: center; font-weight: 800; font-size: 20px;
+}
+.brand-name { font-weight: 800; letter-spacing: 0.08em; font-size: 18px; }
+.brand-sub { font-size: 11.5px; opacity: 0.7; line-height: 1.3; }
+
+.nav { display: flex; flex-direction: column; gap: 4px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; text-align: left;
+  padding: 10px 12px; border-radius: 10px;
+  background: transparent; color: #cbd5e1;
+  border: none; font: inherit; font-size: 0.95rem; cursor: pointer;
+}
+.nav-item:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
+.nav-item.active { background: rgba(255, 255, 255, 0.12); color: #fff; font-weight: 600; }
+.nav-icon { width: 22px; text-align: center; opacity: 0.85; }
+
+.sidebar-foot { margin-top: auto; font-size: 0.82rem; color: #94a3b8; padding: 0 6px; }
+.sidebar-foot a { color: #5eead4; text-decoration: none; }
+.sidebar-foot a:hover { text-decoration: underline; }
+.pill {
+  display: inline-block; font-size: 12px; padding: 4px 10px; border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12); color: #fff;
+}
+
+.main { padding: 24px 28px 32px; min-width: 0; }
+
+.topbar {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  gap: 16px; flex-wrap: wrap; margin-bottom: 20px;
+}
+.topbar h1 { font-size: 1.6rem; margin: 0 0 2px; }
+.topbar p { margin: 0; }
+
+.view { animation: fade 0.25s ease; }
+@keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+.site-footer { color: var(--muted); font-size: 0.8rem; text-align: center; margin-top: 28px; }
+
+/* ---------- Staff console visual system ---------- */
+:root {
+  --navy: #102a43;
+  --teal: #0f766e;
+  --teal-2: #2dd4bf;
+  --bg: #f3f7fb;
+  --line: #dce6ef;
+  --shadow: 0 10px 28px rgba(16, 42, 67, .07);
+}
+body { background: radial-gradient(ellipse at 82% -12%, #d9f3ef 0, transparent 34%), var(--bg); color: #172b4d; }
+.site-header {
+  min-height: 82px; padding: 14px max(24px, calc((100% - 1480px) / 2));
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  color: #fff; background: linear-gradient(110deg, #102a43, #174b5b);
+  box-shadow: 0 8px 24px rgba(16, 42, 67, .16);
+}
+.site-header .brand { padding: 0; }
+.site-header .logo { width: 48px; height: 48px; border-radius: 15px; background: linear-gradient(145deg, #5eead4, #0f9f91); color: #073b3a; }
+.brand-name { font-size: 20px; }
+.brand-sub { font-size: 12px; }
+.header-actions .pill { padding: 9px 14px; border: 1px solid rgba(255,255,255,.22); font: inherit; text-decoration: none; }
+.header-actions .link { color: #e2fffa; }
+.header-actions .button-reset { cursor: pointer; }
+.container { width: min(1480px, calc(100% - 56px)); margin: 0 auto; padding: 38px 0 20px; }
+.dash-head { align-items: center; margin-bottom: 24px; }
+.dash-head h1 { color: var(--navy); font-size: clamp(1.7rem, 2.4vw, 2.25rem); letter-spacing: -.035em; margin: 0 0 5px; }
+.dash-head p { font-size: .98rem; }
+.dash-head .row { gap: 10px; }
+.dash-head .select { width: 210px; }
+.btn-secondary, .btn-primary, .select, .input { min-height: 46px; }
+.btn-secondary { padding: 10px 20px; }
+.stats { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin-bottom: 22px; }
+.stat { min-height: 112px; position: relative; overflow: hidden; padding: 18px 20px; border-radius: 16px; box-shadow: var(--shadow); }
+.stat::after { content: ""; position: absolute; width: 72px; height: 72px; right: -23px; top: -26px; border-radius: 50%; background: #e7f7f4; }
+.stat-value { position: relative; z-index: 1; color: var(--navy); font-size: 2rem; line-height: 1.1; letter-spacing: -.04em; }
+.stat-label { position: relative; z-index: 1; margin-top: 7px; font-size: .86rem; font-weight: 600; }
+.report-list { gap: 18px; }
+.report-card { padding: 26px 30px; border-radius: 18px; box-shadow: var(--shadow); border-color: #e0e9f1; }
+.report { margin: 0; }
+.report-head { padding-bottom: 17px; border-bottom: 1px solid #edf1f5; }
+.report-id-small { font-size: 1rem; color: #123b57; letter-spacing: .01em; }
+.badge { padding: 6px 12px; font-size: .8rem; }
+.progress { margin: 22px 0; position: relative; gap: 0; }
+.progress::before { content: ""; position: absolute; top: 6px; left: 12.5%; right: 12.5%; height: 2px; background: #e1e8ef; }
+.progress-step { position: relative; z-index: 1; font-size: .82rem; }
+.progress-step .dot { width: 14px; height: 14px; outline: 4px solid #fff; margin-bottom: 8px; }
+.meta { grid-template-columns: 115px minmax(0, 1fr); gap: 8px 16px; margin: 20px 0; font-size: .94rem; }
+.meta dt { font-weight: 600; }
+.meta dd { overflow-wrap: anywhere; }
+.field-label { margin: 18px 0 8px; color: #52677d; font-weight: 700; letter-spacing: .075em; }
+.transcript-box { padding: 18px 20px; border-radius: 14px; background: #f7fafc; color: #18344c; font-size: 1.08rem; line-height: 1.8; }
+.controls { grid-template-columns: minmax(170px, 230px) minmax(220px, 1fr) auto; gap: 12px; margin-top: 20px; padding-top: 18px; border-top: 1px solid #edf1f5; }
+.controls .select, .controls .input { min-width: 0; }
+.controls .btn-primary { padding: 10px 20px; white-space: nowrap; box-shadow: 0 5px 12px rgba(15,118,110,.18); }
+.site-footer { width: min(1480px, calc(100% - 56px)); margin: 18px auto 30px; text-align: left; }
+#loginCard { margin: 46px auto; }
+@media (max-width: 1050px) { .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) {
+  .site-header { padding: 12px 18px; }
+  .container { width: min(100% - 32px, 620px); padding-top: 26px; }
+  .dash-head { align-items: stretch; }
+  .dash-head .row { width: 100%; }
+  .dash-head .select { flex: 1; width: auto; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .stat { min-height: 96px; padding: 15px; }
+  .report-card { padding: 20px 18px; }
+  .controls { grid-template-columns: 1fr; }
+  .controls .btn-primary { width: 100%; }
+  .site-footer { width: calc(100% - 32px); }
+}
+@media (max-width: 420px) {
+  .site-header { align-items: flex-start; }
+  .header-actions { flex-direction: column; align-items: stretch; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .meta { grid-template-columns: 1fr; gap: 2px; }
+  .meta dd { margin-bottom: 8px; }
+}
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+.card h2 { margin: 0 0 6px; font-size: 1.2rem; }
+.card h3 { margin: 0 0 12px; font-size: 1rem; }
+.card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.card-head h3 { margin: 0; }
+.wide { max-width: 760px; }
+.narrow { max-width: 420px; }
+
+/* ---------- Dashboard ---------- */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 16px; }
+.stat-card {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 16px; display: flex; gap: 14px; align-items: center;
+}
+.stat-icon {
+  width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center;
+  font-size: 18px; font-weight: 700; flex-shrink: 0;
+}
+.t-teal { background: #ccfbf1; color: #0f766e; }
+.t-blue { background: #dbeafe; color: #1d4ed8; }
+.t-green { background: #dcfae6; color: #067647; }
+.t-violet { background: #ede9fe; color: #6d28d9; }
+.stat-value { font-size: 1.5rem; font-weight: 700; color: var(--navy); line-height: 1.1; }
+.stat-label { font-size: 0.8rem; color: var(--muted); }
+
+.tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.tile {
+  text-align: left; cursor: pointer; font: inherit; color: var(--ink);
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 16px; transition: transform 0.15s, border-color 0.15s;
+}
+.tile:hover { transform: translateY(-2px); border-color: var(--teal-2); }
+.tile-icon {
+  width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center;
+  background: var(--teal-soft); color: var(--teal); font-size: 16px; margin-bottom: 10px;
+}
+.tile-title { font-weight: 700; margin-bottom: 4px; }
+.tile-text { font-size: 0.85rem; color: var(--muted); }
+
+.dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+.bar-row { display: grid; grid-template-columns: 96px 1fr 28px; gap: 10px; align-items: center; margin-bottom: 10px; font-size: 0.9rem; }
+.bar-track { height: 10px; background: #eef2f7; border-radius: 999px; overflow: hidden; }
+.bar-fill { height: 100%; background: linear-gradient(90deg, var(--teal-2), var(--teal)); border-radius: 999px; }
+.bar-count { text-align: right; color: var(--muted); font-weight: 600; }
+
+.recent-row {
+  width: 100%; display: grid; grid-template-columns: 1fr 110px auto; gap: 12px; align-items: center;
+  padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff;
+  cursor: pointer; font: inherit; text-align: left; margin-bottom: 8px;
+}
+.recent-row:hover { border-color: var(--teal-2); background: #f8fffd; }
+.recent-cat { color: var(--muted); font-size: 0.88rem; }
+.mono, .report-id-small { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight: 700; font-size: 0.9rem; }
+
+/* ---------- Buttons and inputs ---------- */
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.actions { margin-top: 18px; justify-content: flex-end; }
+.btn-primary, .btn-secondary {
+  font: inherit; font-weight: 600; border-radius: 10px; padding: 10px 18px;
+  cursor: pointer; border: 1px solid transparent; display: inline-block; text-align: center;
+}
+.btn-primary { background: var(--teal); color: #fff; }
+.btn-primary:hover { background: #0d645e; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-secondary { background: #fff; color: var(--ink); border-color: #cbd5e1; }
+.btn-secondary:hover { background: #f1f5f9; }
+
+.select, .input {
+  width: 100%; font: inherit; padding: 10px 12px; border-radius: 10px;
+  border: 1px solid #cbd5e1; background: #fff; color: var(--ink);
+}
+.input:focus, .select:focus { outline: 2px solid var(--teal-2); outline-offset: 1px; }
+.row .input { flex: 1; min-width: 220px; }
+
+/* ---------- Report flow ---------- */
+.steps { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+.step { font-size: 0.85rem; padding: 6px 12px; border-radius: 999px; background: #eef2f7; color: var(--muted); }
+.step.active { background: var(--teal); color: #fff; }
+.step.complete { background: var(--teal-soft); color: var(--teal); }
+
+.mic-wrap { text-align: center; padding: 14px 0 6px; }
+.mic {
+  width: 128px; height: 128px; border-radius: 50%; border: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--teal-2), var(--teal)); color: #fff;
+  box-shadow: 0 10px 30px rgba(15, 118, 110, 0.35); transition: transform 0.15s;
+}
+.mic:hover { transform: scale(1.03); }
+.mic:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.mic.recording { background: var(--danger); animation: pulse 1.2s infinite; }
+.mic-icon { font-size: 34px; line-height: 1; }
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(180, 35, 24, 0.45); }
+  70% { box-shadow: 0 0 0 18px rgba(180, 35, 24, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(180, 35, 24, 0); }
+}
+.mic-label { margin-top: 14px; font-weight: 600; font-size: 1.05rem; }
+.muted { color: var(--muted); }
+.small { font-size: 0.85rem; }
+
+.optional { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 16px; }
+.optional-title { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
+.preview { display: block; max-width: 100%; max-height: 220px; border-radius: 10px; margin-top: 12px; border: 1px solid var(--line); }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+.field-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin: 14px 0 6px; }
+.transcript-box {
+  background: #f8fafc; border: 1px solid var(--line); border-radius: 10px;
+  padding: 14px; font-size: 1.05rem; line-height: 1.6; white-space: pre-wrap; min-height: 56px;
+}
+.dept-box {
+  background: var(--teal-soft); border-radius: 10px; padding: 10px 12px;
+  font-size: 0.92rem; color: #134e4a; min-height: 42px;
+}
+.error { color: var(--danger); font-size: 0.92rem; margin-top: 12px; }
+
+.success-badge {
+  display: inline-block; background: #dcfae6; color: #067647;
+  font-weight: 600; font-size: 0.85rem; padding: 4px 12px; border-radius: 999px;
+}
+.report-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 1.5rem; font-weight: 700; letter-spacing: 0.04em; margin: 8px 0 14px; color: var(--navy);
+}
+.disclaimer { font-size: 0.82rem; color: var(--muted); margin-top: 18px; border-top: 1px solid var(--line); padding-top: 12px; }
+
+/* ---------- Tracking ---------- */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.chip {
+  font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.8rem;
+  padding: 6px 10px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer;
+}
+.recent { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 4px; }
+
+.report { margin-top: 16px; }
+.report-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.progress { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 14px 0 6px; }
+.progress-step { text-align: center; color: var(--muted); font-size: 0.78rem; }
+.progress-step .dot { width: 12px; height: 12px; border-radius: 50%; background: #cbd5e1; margin: 0 auto 4px; }
+.progress-step.done { color: var(--teal); font-weight: 600; }
+.progress-step.done .dot { background: var(--teal); }
+.meta { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 14px 0; font-size: 0.92rem; }
+.meta dt { color: var(--muted); }
+.meta dd { margin: 0; }
+.history { padding-left: 18px; margin: 6px 0 0; }
+.history li { margin-bottom: 8px; }
+
+.badge {
+  padding: 4px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600;
+  background: #eef2f7; color: var(--muted); white-space: nowrap; justify-self: start;
+}
+.badge-received { background: #dbeafe; color: #1d4ed8; }
+.badge-routed { background: #fef3c7; color: #b45309; }
+.badge-in-progress { background: #ede9fe; color: #6d28d9; }
+.badge-resolved { background: #dcfae6; color: #067647; }
+.badge-sample { background: #fef3c7; color: #b45309; }
+
+/* ---------- Help and departments ---------- */
+.how-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.how-step { display: flex; gap: 14px; align-items: flex-start; }
+.how-num {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--teal); color: #fff;
+  display: grid; place-items: center; font-weight: 700; flex-shrink: 0;
+}
+.how-step h3 { margin: 0 0 4px; }
+.how-step p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* ---------- Staff console ---------- */
+.header-actions { display: flex; gap: 8px; align-items: center; }
+.dash-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.dash-head h1 { margin: 0 0 4px; font-size: 1.5rem; }
+.report-list { display: grid; gap: 14px; }
+.report-card { margin: 0; }
+.controls { display: grid; grid-template-columns: 180px 1fr auto; gap: 10px; margin-top: 14px; }
+.stat { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px; box-shadow: var(--shadow); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 980px) {
+  .stats, .tiles { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; }
+  .nav { flex-direction: row; flex-wrap: wrap; }
+  .nav-item { width: auto; }
+  .dash-grid, .how-grid, .grid2 { grid-template-columns: 1fr; }
+  .controls { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .stats, .tiles { grid-template-columns: 1fr; }
+  .main { padding: 18px 14px 28px; }
+  .progress { grid-template-columns: repeat(2, 1fr); row-gap: 10px; }
+  .recent-row { grid-template-columns: 1fr; }
+}
+
+/* Keep staff-specific sizing after the shared page styles. */
+.container { width: min(1480px, calc(100% - 56px)); margin: 0 auto; padding: 38px 0 20px; }
+.stats { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; margin-bottom: 22px; }
+.stat { min-height: 112px; padding: 18px 20px; }
+.report-list { gap: 18px; }
+.report-card { padding: 26px 30px; border-radius: 18px; }
+.report { margin: 0; }
+.progress { margin: 22px 0; }
+.meta { grid-template-columns: 115px minmax(0, 1fr); gap: 8px 16px; margin: 20px 0; }
+.transcript-box { padding: 18px 20px; font-size: 1.08rem; line-height: 1.8; }
+.controls { grid-template-columns: minmax(170px, 230px) minmax(220px, 1fr) auto; gap: 12px; margin-top: 20px; padding-top: 18px; }
+.site-footer { width: min(1480px, calc(100% - 56px)); margin: 18px auto 30px; text-align: left; }
+@media (max-width: 1050px) { .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 860px) {
+  .container { width: min(100% - 32px, 620px); padding-top: 26px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .controls { grid-template-columns: 1fr; }
+  .report-card { padding: 20px 18px; }
+  .site-footer { width: calc(100% - 32px); }
+}
+@media (max-width: 560px) {
+  .container { width: calc(100% - 28px); }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .meta { grid-template-columns: 1fr; gap: 2px; }
+  .meta dd { margin-bottom: 8px; }
+}
+.tts-area { margin-top: 8px; }
+.tts-button { color: #0f5d58; border-color: #b7d8d2; background: #f2fbf9; }
+.tts-button:hover { background: #e3f6f2; }
+.tts-playback { display: block; width: min(100%, 520px); height: 46px; margin-top: 8px; }
+.staff-location { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.location-map-link { color: #0f766e; font-size: .86rem; font-weight: 700; text-decoration: none; }
+.location-map-link:hover { text-decoration: underline; }
+
+/* Consistent polish and accessible controls */
+body { background: radial-gradient(ellipse at 85% -10%, #dff5f1 0, transparent 32%), #f2f7fb; }
+.site-header { min-height: 88px; padding-top: 16px; padding-bottom: 16px; }
+.brand-name { font-size: 21px; }
+.container { padding-top: clamp(26px, 4vw, 48px); }
+.dash-head { padding: 0 2px 20px; border-bottom: 1px solid #dce7ef; }
+.dash-head h1 { font-size: clamp(1.75rem, 2.4vw, 2.25rem); letter-spacing: -.035em; }
+.stat, .report-card, #loginCard { border-color: #e1eaf1; box-shadow: 0 12px 32px rgba(16,42,67,.075); }
+.stat { border-radius: 17px; }
+.report-card { border-radius: 20px; }
+#loginCard { padding: 30px; border-radius: 20px; background: linear-gradient(145deg, #fff, #f8fcfd); }
+#loginCard h2 { color: #102a43; font-size: 1.55rem; }
+.btn-primary, .btn-secondary { min-height: 46px; transition: transform .16s ease, box-shadow .16s ease, background .16s ease; }
+.btn-primary { box-shadow: 0 7px 18px rgba(8,127,117,.18); }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 22px rgba(8,127,117,.22); }
+.select, .input { min-height: 46px; border-color: #cbd9e4; }
+.input:focus, .select:focus { outline: 3px solid rgba(45,212,191,.24); border-color: #087f75; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #2dd4bf; outline-offset: 3px; }
+@media (max-width: 560px) {
+  .site-header { align-items: center; }
+  .container { padding-top: 22px; }
+  #loginCard { padding: 22px 18px; }
+  .dash-head { gap: 12px; }
+}
+
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="brand">
+    <div class="logo">R</div>
+    <div>
+      <div class="brand-name">RAIVI</div>
+      <div class="brand-sub">Staff console · Demo</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <a class="pill link" href="/">Citizen app</a>
+    <button id="logoutBtn" class="pill button-reset" type="button" hidden>Log out</button>
+  </div>
+</header>
+
+<main class="container">
+  <!-- Login -->
+  <section id="loginCard" class="card narrow" hidden>
+    <h2>Staff login</h2>
+    <p class="muted small">Authorized department staff only. Sign-in expires automatically after 8 hours.</p>
+    <form id="staffLoginForm">
+      <label class="field-label" for="passwordInput">Staff password</label>
+      <input id="passwordInput" class="input" type="password" autocomplete="current-password" required />
+      <div class="row actions">
+        <button id="loginBtn" class="btn-primary" type="submit">Log in securely</button>
+      </div>
+    </form>
+    <div id="loginError" class="error" hidden></div>
+  </section>
+
+  <!-- Dashboard -->
+  <section id="dashboard" hidden>
+    <div class="dash-head">
+      <div>
+        <h1>Complaints</h1>
+        <p class="muted small">Update each complaint as work progresses. Notes are shown to the citizen.</p>
+      </div>
+      <div class="row">
+        <select id="statusFilter" class="select">
+          <option value="All">All statuses</option>
+        </select>
+        <button id="refreshBtn" class="btn-secondary" type="button">Refresh</button>
+      </div>
+    </div>
+
+    <div id="stats" class="stats"></div>
+    <div id="reportList" class="report-list"></div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  Demo staff console. Live integration with government departments is not included.
+</footer>
+
+<script>
+// Shared helpers for RAIVI pages.
+const STATUSES = ["Received", "Routed", "In Progress", "Resolved"];
+
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined && text !== null) node.textContent = text;
+  return node;
+}
+
+function formatTime(iso) {
+  return new Date(iso).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
+}
+
+function statusBadge(status) {
+  return el("span", "badge badge-" + status.toLowerCase().replace(/\s+/g, "-"), status);
+}
+
+function renderProgress(status) {
+  const idx = STATUSES.indexOf(status);
+  const wrap = el("div", "progress");
+  STATUSES.forEach((s, i) => {
+    const step = el("div", "progress-step" + (i <= idx ? " done" : ""));
+    step.append(el("div", "dot"), el("div", "progress-label", s));
+    wrap.append(step);
+  });
+  return wrap;
+}
+
+function addMeta(dl, label, value) {
+  dl.append(el("dt", "", label), el("dd", "", value));
+}
+
+// Full view of one complaint: ID, status, progress, details, photo and history.
+function renderReport(report) {
+  const wrap = el("div", "report");
+
+  const head = el("div", "report-head");
+  head.append(el("div", "report-id-small", report.id), statusBadge(report.status));
+  wrap.append(head, renderProgress(report.status));
+
+  const meta = el("dl", "meta");
+  addMeta(meta, "Category", report.category);
+  addMeta(meta, "Department", report.department);
+  addMeta(meta, "Reported by", report.complainant_name || "Name not provided");
+  const locationLabel = el("dt", "", "Location");
+  const locationValue = el("dd", "staff-location");
+  const placeText = report.location_text || (report.location ? "GPS location" : "Not provided");
+  locationValue.append(el("span", "", placeText));
+  if (report.location) {
+    locationValue.append(el("span", "muted small", ` (${report.location.lat.toFixed(5)}, ${report.location.lng.toFixed(5)})`));
+  }
+  if (report.location || report.location_text) {
+    const mapQuery = report.location
+      ? `${report.location.lat},${report.location.lng}`
+      : report.location_text;
+    const mapLink = el("a", "location-map-link", "Open map");
+    mapLink.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`;
+    mapLink.target = "_blank";
+    mapLink.rel = "noopener noreferrer";
+    locationValue.append(mapLink);
+  }
+  meta.append(locationLabel, locationValue);
+  addMeta(meta, "Submitted", formatTime(report.created_at));
+  addMeta(meta, "Last update", formatTime(report.updated_at));
+  wrap.append(meta);
+
+  wrap.append(el("div", "field-label", "Complaint (from voice)"));
+  wrap.append(el("div", "transcript-box", report.transcript));
+
+  wrap.append(el("div", "field-label", "AI voice playback · Gnani Timbre"));
+  const ttsArea = el("div", "tts-area");
+  const ttsButton = el("button", "btn-secondary tts-button", "▶  Hear in RAIVI voice");
+  ttsButton.type = "button";
+  ttsButton.addEventListener("click", async () => {
+    ttsArea.replaceChildren(ttsButton);
+    ttsButton.disabled = true;
+    ttsButton.textContent = "Generating AI voice…";
+    try {
+      const response = await fetch("/api/speak", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: report.transcript }),
+      });
+      if (!response.ok) {
+        const problem = await response.json().catch(() => ({}));
+        throw new Error(problem.error || "Could not generate the AI voice readout.");
+      }
+      const player = document.createElement("audio");
+      player.className = "tts-playback";
+      player.controls = true;
+      player.preload = "metadata";
+      player.src = URL.createObjectURL(await response.blob());
+      ttsArea.replaceChildren(player);
+    } catch (error) {
+      ttsButton.disabled = false;
+      ttsButton.textContent = "▶  Retry AI voice readout";
+      const message = el("div", "error small", error.message);
+      ttsArea.append(message);
+    }
+  });
+  ttsArea.append(ttsButton);
+  wrap.append(ttsArea);
+
+  if (report.photo_url) {
+    const img = el("img", "preview");
+    img.src = report.photo_url;
+    img.alt = "Photo attached to the complaint";
+    wrap.append(img);
+  }
+
+  if (report.history && report.history.length) {
+    wrap.append(el("div", "field-label", "History"));
+    const list = el("ul", "history");
+    report.history.forEach((h) => {
+      const li = el("li");
+      li.append(el("strong", "", h.status), el("span", "muted small", "  " + formatTime(h.at)));
+      if (h.note) li.append(el("div", "small", h.note));
+      list.append(li);
+    });
+    wrap.append(list);
+  }
+  return wrap;
+}
+
+// Decode the browser recording and convert it to 16-bit mono WAV (the format the API accepts)
+function encodeWav(audioBuffer) {
+  const sampleRate = audioBuffer.sampleRate;
+  const length = audioBuffer.length;
+  const mono = new Float32Array(length);
+  for (let c = 0; c < audioBuffer.numberOfChannels; c++) {
+    const data = audioBuffer.getChannelData(c);
+    for (let i = 0; i < length; i++) mono[i] += data[i] / audioBuffer.numberOfChannels;
+  }
+  const byteLength = 44 + length * 2;
+  const view = new DataView(new ArrayBuffer(byteLength));
+  const writeStr = (offset, s) => {
+    for (let i = 0; i < s.length; i++) view.setUint8(offset + i, s.charCodeAt(i));
+  };
+  writeStr(0, "RIFF"); view.setUint32(4, byteLength - 8, true); writeStr(8, "WAVE");
+  writeStr(12, "fmt "); view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true); view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true);
+  writeStr(36, "data"); view.setUint32(40, length * 2, true);
+  let offset = 44;
+  for (let i = 0; i < length; i++) {
+    const s = Math.max(-1, Math.min(1, mono[i]));
+    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+    offset += 2;
+  }
+  return new Blob([view], { type: "audio/wav" });
+}
+
+async function recordingToWav(blob) {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  try {
+    const audioBuffer = await ctx.decodeAudioData(await blob.arrayBuffer());
+    return encodeWav(audioBuffer);
+  } finally {
+    ctx.close();
+  }
+}
+
+// Speak a short confirmation. Failure is silent: the report is already saved.
+async function speakText(text) {
+  try {
+    const res = await fetch("/api/speak", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+    if (!res.ok) return;
+    const audio = new Audio(URL.createObjectURL(await res.blob()));
+    audio.play();
+  } catch {
+    // Optional audio
+  }
+}
+
+</script>
+<script>
+const $ = (id) => document.getElementById(id);
+let allReports = [];
+
+async function api(path, options = {}) {
+  const res = await fetch(path, {
+    method: options.method || "GET",
+    headers: { "Content-Type": "application/json" },
+    body: options.body ? JSON.stringify(options.body) : undefined,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error || "Request failed.");
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+function showLogin(message) {
+  $("dashboard").hidden = true;
+  $("logoutBtn").hidden = true;
+  $("loginCard").hidden = false;
+  $("passwordInput").value = "";
+  $("loginError").textContent = message || "";
+  $("loginError").hidden = !message;
+}
+
+async function loadAll() {
+  try {
+    const data = await api("/api/reports");
+    allReports = data.reports;
+    $("loginCard").hidden = true;
+    $("dashboard").hidden = false;
+    $("logoutBtn").hidden = false;
+    renderStats();
+    renderList();
+  } catch (err) {
+    showLogin(err.status === 401 ? "Please sign in to view staff reports." : err.message);
+  }
+}
+
+async function login() {
+  const button = $("loginBtn");
+  button.disabled = true;
+  try {
+    await api("/api/staff/login", { method: "POST", body: { password: $("passwordInput").value } });
+    $("passwordInput").value = "";
+    await loadAll();
+  } catch (err) {
+    showLogin(err.message);
+  } finally {
+    button.disabled = false;
+  }
+}
+
+function statBox(label, value) {
+  const box = el("div", "stat");
+  box.append(el("div", "stat-value", String(value)), el("div", "stat-label", label));
+  return box;
+}
+
+function renderStats() {
+  const box = $("stats");
+  box.innerHTML = "";
+  box.append(statBox("Total", allReports.length));
+  STATUSES.forEach((s) => box.append(statBox(s, allReports.filter((r) => r.status === s).length)));
+}
+
+function renderList() {
+  const filter = $("statusFilter").value;
+  const list = $("reportList");
+  list.innerHTML = "";
+  const items = allReports.filter((r) => filter === "All" || r.status === filter);
+  if (!items.length) {
+    list.append(el("div", "card muted", "No complaints match this filter."));
+    return;
+  }
+  items.forEach((r) => list.append(reportCard(r)));
+}
+
+function reportCard(report) {
+  const card = el("article", "card report-card");
+  card.append(renderReport(report));
+
+  const controls = el("div", "controls");
+  const select = document.createElement("select");
+  select.className = "select";
+  STATUSES.forEach((s) => {
+    const option = document.createElement("option");
+    option.value = s;
+    option.textContent = s;
+    if (s === report.status) option.selected = true;
+    select.append(option);
+  });
+
+  const note = document.createElement("input");
+  note.className = "input";
+  note.placeholder = "Note for the citizen (optional)";
+
+  const btn = el("button", "btn-primary", "Update status");
+  btn.type = "button";
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    try {
+      await api(`/api/reports/${encodeURIComponent(report.id)}/status`, {
+        method: "PATCH",
+        body: { status: select.value, note: note.value },
+      });
+      await loadAll();
+    } catch (err) {
+      alert(err.message);
+      btn.disabled = false;
+    }
+  });
+
+  controls.append(select, note, btn);
+  card.append(controls);
+  return card;
+}
+
+// Populate the filter
+STATUSES.forEach((s) => {
+  const option = document.createElement("option");
+  option.value = s;
+  option.textContent = s;
+  $("statusFilter").append(option);
+});
+
+$("statusFilter").addEventListener("change", renderList);
+$("refreshBtn").addEventListener("click", loadAll);
+$("staffLoginForm").addEventListener("submit", (event) => { event.preventDefault(); login(); });
+$("logoutBtn").addEventListener("click", async () => {
+  try { await api("/api/staff/logout", { method: "POST" }); } catch {}
+  showLogin("");
+});
+
+loadAll();
+</script>
+</body>
+</html>
